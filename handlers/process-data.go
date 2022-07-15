@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
 	"mouse-mousements-thesis-backend/calculations"
 	"net/http"
@@ -44,9 +43,14 @@ func ProccessData(c *gin.Context) {
 	}
 
 	mouseMovementsOverTimes := calculations.CalcDistanceOverTime(mouseMoveDistances, mouseMoveTimes)
-	fmt.Println(mouseMovementsOverTimes)
+
+	averageMovementDistance := calculations.CalculateAverage(mouseMoveDistances)
+	averageMovementTimes := calculations.CalculateAverage(mouseMoveTimes)
+	averageMovementDistanceOverTime := calculations.CalculateAverage(mouseMovementsOverTimes)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "ok",
+		"averagMovementDistance":          averageMovementDistance,
+		"averageMovementTime":             averageMovementTimes,
+		"averageMovementDistanceOverTime": averageMovementDistanceOverTime,
 	})
 }

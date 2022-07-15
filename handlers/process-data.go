@@ -13,7 +13,7 @@ type dataPayload struct {
 	MouseMovement []struct {
 		X int     `json:"x"`
 		Y int     `json:"y"`
-		Z float64 `json:"t"`
+		T float64 `json:"t"`
 	} `json:"mouseMovement"`
 }
 
@@ -34,10 +34,14 @@ func ProccessData(c *gin.Context) {
 	}
 
 	movementData := userData.MouseMovement
+	mouseMoveDistances := make([]float64, 0)
+	mouseMoveTimes := make([]float64, 0)
 
 	for i := 0; i < len(movementData)-1; i++ {
-		fmt.Println(calculations.CalculateDistance(movementData[i].X, movementData[i+1].X, movementData[i].Y, movementData[i+1].Y))
+		mouseMoveDistances = append(mouseMoveDistances, calculations.CalculateDistance(movementData[i].X, movementData[i+1].X, movementData[i].Y, movementData[i+1].Y))
+		mouseMoveTimes = append(mouseMoveTimes, (movementData[i+1].T - movementData[i].T))
 	}
+	fmt.Println(mouseMoveDistances)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "ok",

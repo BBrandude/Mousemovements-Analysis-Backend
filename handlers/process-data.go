@@ -34,6 +34,7 @@ func ProccessData(c *gin.Context) {
 	}
 
 	movementData := userData.MouseMovement
+
 	mouseMoveDistances := make([]float64, 0)
 	mouseMoveTimes := make([]float64, 0)
 
@@ -41,7 +42,9 @@ func ProccessData(c *gin.Context) {
 		mouseMoveDistances = append(mouseMoveDistances, calculations.CalculateDistance(movementData[i].X, movementData[i+1].X, movementData[i].Y, movementData[i+1].Y))
 		mouseMoveTimes = append(mouseMoveTimes, (movementData[i+1].T - movementData[i].T))
 	}
-	fmt.Println(mouseMoveDistances)
+
+	mouseMovementsOverTimes := calculations.CalcDistanceOverTime(mouseMoveDistances, mouseMoveTimes)
+	fmt.Println(mouseMovementsOverTimes)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "ok",

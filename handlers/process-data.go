@@ -47,8 +47,10 @@ func ProccessData(c *gin.Context) {
 	averageMovementDistance := calculations.CalculateAverage(mouseMoveDistances)
 	averageMovementTimes := calculations.CalculateAverage(mouseMoveTimes)
 	averageMovementDistanceOverTime := calculations.CalculateAverage(mouseMovementsOverTimes)
+	standardDeviation := calculations.CalculateStandardDeviation(movementData)
 
 	c.JSON(http.StatusOK, gin.H{
+		"standardDeviation":               standardDeviation,
 		"averagMovementDistance":          averageMovementDistance,
 		"averageMovementTime":             averageMovementTimes,
 		"averageMovementDistanceOverTime": averageMovementDistanceOverTime,

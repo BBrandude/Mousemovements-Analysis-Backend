@@ -10,6 +10,7 @@ import (
 	"mouse-mousements-thesis-backend/configs"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -65,33 +66,29 @@ func ProccessData(c *gin.Context) {
 	averageMovementDistanceOverTime := calculations.CalculateAverage(mouseMovementsOverTimes)
 	standardDeviation := calculations.CalculateStandardDeviation(movementData)
 
-	c.JSON(http.StatusOK, gin.H{
-		"standardDeviation":               standardDeviation,
-		"averagMovementDistance":          averageMovementDistance,
-		"averageMovementTime":             averageMovementTimes,
-		"averageMovementDistanceOverTime": averageMovementDistanceOverTime,
-	})
+	c.String(http.StatusOK, "thank you for the data")
 
-	movementDataCollection, err := movementDataCollection.InsertOne(context.TODO(), bson.M{
+	movementDataCollectionInsertion, err := movementDataCollection.InsertOne(context.TODO(), bson.M{
 		"_id":                             cookieVerifcationRes.UserIdentification,
+		"date":                            time.Now().UnixMilli(),
 		"movements":                       movementData,
 		"standardDeviation":               standardDeviation,
 		"averagMovementDistance":          averageMovementDistance,
 		"averageMovementTime":             averageMovementTimes,
 		"averageMovementDistanceOverTime": averageMovementDistanceOverTime,
 	})
-	if err != nil {
-		fmt.Println(err)
-	} else if movementDataCollection.InsertedID != nil {
-		fmt.Println(movementDataCollection)
-	}
+	_ = err
+	_ = movementDataCollectionInsertion
+
 }
 
-func verify(cookie string, apiKey string) struct {
+type cookieRes struct {
 	Status             string `json:"status"`
 	Reason             string `json:"reason"`
 	UserIdentification string `json:"userIdentification"`
-} {
+}
+
+func verify(cookie string, apiKey string) cookieRes {
 
 	url := "http://avantsecure.net/endpointprotection/" + cookie
 	method := "GET"
@@ -126,10 +123,4 @@ func verify(cookie string, apiKey string) struct {
 	}
 
 	return avantResponse
-}
-
-type cookieRes struct {
-	Status             string `json:"status"`
-	Reason             string `json:"reason"`
-	UserIdentification string `json:"userIdentification"`
 }

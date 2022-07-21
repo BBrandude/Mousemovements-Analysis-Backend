@@ -9,6 +9,7 @@ import (
 	"mouse-mousements-thesis-backend/calculations"
 	"mouse-mousements-thesis-backend/configs"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -38,7 +39,7 @@ func ProccessData(c *gin.Context) {
 	if err != nil {
 		c.String(http.StatusBadRequest, "untrusted")
 	}
-	cookieVerifcationRes := verify(avantCookie.Value, "dEdfdNYGegYIneeEkwMLEL6iIXGBjqAiZul7kSBWMLLh80NOG7m6HhrjDDgxKIUl")
+	cookieVerifcationRes := verify(avantCookie.Value, os.Getenv("AVANTPRIVATEAPIKEY"))
 	if cookieVerifcationRes.Status == "deny" {
 		c.String(http.StatusBadRequest, "untrusted")
 		return

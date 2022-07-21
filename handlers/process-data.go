@@ -1,11 +1,18 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"mouse-mousements-thesis-backend/calculations"
+	"mouse-mousements-thesis-backend/configs"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type dataPayload struct {
@@ -16,19 +23,27 @@ type dataPayload struct {
 	} `json:"mouseMovement"`
 }
 
+var movementDataCollection *mongo.Collection = configs.GetCollection(configs.DB, "mousemovementdata")
+
 func ProccessData(c *gin.Context) {
-	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-	c.Writer.Header().Set("Access-Control-Allow-Headers", "*")
-	c.Writer.Header().Set("Content-Type", "*")
-	c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-	c.Writer.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
 	var userData dataPayload
 
 	if err := c.BindJSON(&userData); err != nil {
 		log.Fatal(err)
 		c.String(http.StatusInternalServerError, "invalid data submitted")
+		return
+	}
+	avantCookie, err := c.Request.Cookie("avant")
+	if err != nil {
+		c.String(http.StatusBadRequest, "untrusted")
+	}
+	cookieVerifcationRes := verify(avantCookie.Value, "dEdfdNYGegYIneeEkwMLEL6iIXGBjqAiZul7kSBWMLLh80NOG7m6HhrjDDgxKIUl")
+	if cookieVerifcationRes.Status == "deny" {
+		c.String(http.StatusBadRequest, "untrusted")
+		return
+	} else if cookieVerifcationRes.Status != "allow" {
+		c.String(http.StatusInternalServerError, "internal error")
 		return
 	}
 
@@ -55,4 +70,65 @@ func ProccessData(c *gin.Context) {
 		"averageMovementTime":             averageMovementTimes,
 		"averageMovementDistanceOverTime": averageMovementDistanceOverTime,
 	})
+
+	movementDataCollection, err := movementDataCollection.InsertOne(context.TODO(), bson.M{
+		"_id":                             cookieVerifcationRes.UserIdentification,
+		"movements":                       movementData,
+		"standardDeviation":               standardDeviation,
+		"averagMovementDistance":          averageMovementDistance,
+		"averageMovementTime":             averageMovementTimes,
+		"averageMovementDistanceOverTime": averageMovementDistanceOverTime,
+	})
+	if err != nil {
+		fmt.Println(err)
+	} else if movementDataCollection.InsertedID != nil {
+		fmt.Println(movementDataCollection)
+	}
+}
+
+func verify(cookie string, apiKey string) struct {
+	Status             string `json:"status"`
+	Reason             string `json:"reason"`
+	UserIdentification string `json:"userIdentification"`
+} {
+
+	url := "http://avantsecure.net/endpointprotection/" + cookie
+	method := "GET"
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest(method, url, nil)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	req.Header.Add("x-api-key", apiKey)
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var avantResponse cookieRes
+	err = json.Unmarshal([]byte(body), &avantResponse) // here!
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return avantResponse
+}
+
+type cookieRes struct {
+	Status             string `json:"status"`
+	Reason             string `json:"reason"`
+	UserIdentification string `json:"userIdentification"`
 }

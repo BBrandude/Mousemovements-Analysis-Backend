@@ -40,7 +40,7 @@ func ProccessData(c *gin.Context) {
 	if err != nil {
 		c.String(http.StatusBadRequest, "untrusted")
 	}
-	cookieVerifcationRes := verify(avantCookie.Value, os.Getenv("AVANTPRIVATEAPIKEY"))
+	cookieVerifcationRes := Verify(avantCookie.Value, os.Getenv("AVANTPRIVATEAPIKEY"), "endpointprotection")
 	if cookieVerifcationRes.Status == "deny" {
 		c.String(http.StatusBadRequest, "untrusted")
 		return
@@ -88,9 +88,9 @@ type cookieRes struct {
 	UserIdentification string `json:"userIdentification"`
 }
 
-func verify(cookie string, apiKey string) cookieRes {
+func Verify(cookie string, apiKey string, verificationType string) cookieRes {
 
-	url := "http://avantsecure.net/endpointprotection/" + cookie
+	url := "http://avantsecure.net/" + verificationType + "/" + cookie
 	method := "GET"
 
 	client := &http.Client{}

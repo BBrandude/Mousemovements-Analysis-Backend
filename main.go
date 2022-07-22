@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"mouse-mousements-thesis-backend/handlers"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func main() {
-
+	fmt.Println("hi")
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{

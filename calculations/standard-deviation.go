@@ -1,7 +1,6 @@
 package calculations
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -17,8 +16,6 @@ func CalculateStandardDeviation(mouseMovements []struct {
 	y2 := float64(mouseMovements[movementsLength-1].Y)
 	slope := (y2 - y1) / (x2 - x1)
 	yIntercept := y1 - (slope * x1)
-	fmt.Println(yIntercept)
-	fmt.Println(slope)
 	var totalDistance float64 = 0
 	for i := 0; i < movementsLength; i++ {
 		totalDistance += shortestDistance(float64(mouseMovements[i].X), float64(mouseMovements[i].Y), -slope, 1, -yIntercept)

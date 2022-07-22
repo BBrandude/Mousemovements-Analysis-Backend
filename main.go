@@ -21,7 +21,9 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	//r.Use()
+	//avantsecure.EndpointProtection("dEdfdNYGegYIneeEkwMLEL6iIXGBjqAiZul7kSBWMLLh80NOG7m6HhrjDDgxKIUl")
 	r.POST("/proccessdata", handlers.ProccessData)
-
+	r.GET("/viewdata", handlers.ViewData)
 	r.Run(":8000")
 }

@@ -24,8 +24,8 @@ func main() {
 
 	//r.Use()
 	//avantsecure.EndpointProtection("dEdfdNYGegYIneeEkwMLEL6iIXGBjqAiZul7kSBWMLLh80NOG7m6HhrjDDgxKIUl")
-	r.POST("/proccessdata", handlers.ProccessData)
-	r.GET("/viewdata", handlers.ViewData)
-	r.GET("/testr", handlers.Test)
+	r.POST("/api/proccessdata", handlers.ProccessData)
+	r.GET("/api/viewdata", handlers.ViewData)
+	r.GET("/api/testr", handlers.Test)
 	r.Run(":8000")
 }
